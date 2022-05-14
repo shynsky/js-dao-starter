@@ -1,10 +1,40 @@
-import { useAddress, useMetamask } from '@thirdweb-dev/react'
+import { useAddress, useMetamask, useEditionDrop } from '@thirdweb-dev/react'
+import { useState, useEffect } from 'react';
 
 const App = () => {
   // Use the hooks thirdweb give us.
-  const address = useAddress()
-  const connectWithMetamask = useMetamask()
+  const address = useAddress();
+  const connectWithMetamask = useMetamask();
   console.log('👋 Address:', address)
+
+  // Initialize our editionDrop contract
+  const editionDrop = useEditionDrop('0x6a583B583f2dD4cb3F70250B5501C2a5bd1A0950');
+  // State variable for us to know if user has our NFT
+  const [hasClaimedNFT, setHasClaimedNFT] = useState(false);
+
+  useEffect(() => {
+    // If they don't have a connected wallet, exit
+    if(!address) {
+      return;
+    }
+
+    const checkBalance = async() => {
+      try {
+        const balance = await editionDrop.balanceOf(address, 0);
+        if(balance.gt(0)) {
+          setHasClaimedNFT(true);
+          console.log('🌟 this user has a membership NFT');
+        } else {
+          setHasClaimedNFT(false);
+          console.log("😭 this user doesn't have a membership NFT")
+        }
+      } catch (error) {
+        setHasClaimedNFT(false);
+        console.log('Failed to get the balance', error);
+      }
+    };
+    checkBalance();
+  }, [address, editionDrop]);
 
   // This is the case where the user hasn't connected their wallet
   // to your web app. Let them call connectWallet.
