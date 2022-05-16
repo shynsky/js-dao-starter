@@ -1,11 +1,12 @@
-import { useAddress, useMetamask, useEditionDrop, useToken, useVote } from '@thirdweb-dev/react'
+import { useAddress, useMetamask, useEditionDrop, useToken, useVote, useNetwork } from '@thirdweb-dev/react'
 import { useState, useEffect, useMemo } from 'react'
 import { AddressZero } from '@ethersproject/constants'
-import { format } from 'util'
+import { ChainId } from '@thirdweb-dev/sdk'
 
 const App = () => {
   // Use the hooks thirdweb give us.
   const address = useAddress()
+  const network = useNetwork()
   const connectWithMetamask = useMetamask()
   console.log('👋 Address:', address)
 
@@ -168,6 +169,15 @@ const App = () => {
     } finally {
       setIsClaiming(false)
     }
+  }
+
+  if (address && network?.[0].data.chain.id !== ChainId.Rinkeby) {
+    return (
+      <div className='unsupported-network'>
+        <h2>Please connect to Rinkeby</h2>
+        <p>This dapp only works on the Rinkeby network, please switch networks in your connected wallet.</p>
+      </div>
+    )
   }
 
   // This is the case where the user hasn't connected their wallet
